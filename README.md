@@ -5,6 +5,11 @@ A bash script in order to test the performance of the 42 project push_swap
 
 Clone this repository into your push_swap folder and cd into it.
 
+```
+git clone git@github.com:LofiLeon/push_swap_performance_test.git
+cd push_swap_performance_test
+```
+
 **Usage**
 ```
 ./checker_script.sh [count_of_numbers > 1] [number_of_times > 0]
@@ -14,6 +19,7 @@ Clone this repository into your push_swap folder and cd into it.
 
 **Example**
 
+![Performance Tester Screenshot](https://github.com/LofiLeon/push_swap_performance_test/blob/main/performance_tester_screenshot.png)
 
 **Features**
 
