@@ -1,24 +1,12 @@
 #!/bin/bash
 
-# Determine the appropriate checker executable based on the operating system
+# Determine operating system
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     checker_executable="./checker_linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OSX
     checker_executable="./checker_Mac"
 else
-    # Unknown.
     echo "Unsupported operating system. This script supports Linux and Mac OSX."
-    exit 1
-fi
-
-# Define the number of random numbers and number of times from the arguments
-n=$1
-times=$2
-
-# Check if the correct number of arguments is provided
-if [ $# -ne 2 -o $n -lt 2 -o $times -lt 1 ]; then
-    echo "Usage: $0 [count_of_numbers > 1] [number_of_times > 0]"
     exit 1
 fi
 
@@ -26,6 +14,16 @@ fi
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
+
+# Define the number of random numbers (n) and number of times from the arguments (times)
+n=$1
+times=$2
+
+# Check if the correct number of arguments is provided and if arguments are in correct range
+if [ $# -ne 2 -o $n -lt 2 -o $times -lt 1 ]; then
+    echo "Usage: $0 [count_of_numbers > 1] [number_of_times > 0]"
+    exit 1
+fi
 
 # Define output format
 output_format_run="Run %-5s | Moves: %-5s | Result: %b\n"
@@ -40,14 +38,25 @@ echo "----------------------------------------"
 # Run the program the specified number of times
 for (( i=1; i<=times; i++ ))
 do
-    # Generate random numbers as a single string separated by spaces
-    random_numbers_positive=$(shuf -i 1-1000 -n "$(($n / 2))" | tr '\n' ' ' | sed 's/ $//')
-    random_numbers_negative=$(shuf -i 1-1000 -n "$(($n - $n / 2))" | awk '{print $0*-1}' | tr '\n' ' ' | sed 's/ $//')
-    random_numbers="$random_numbers_positive $random_numbers_negative"
-
-    # Convert the string into an array and shuffle it
-    read -ra random_numbers_array <<< "$random_numbers"
-    random_numbers=$(printf "%s\n" "${random_numbers_array[@]}" | shuf | tr '\n' ' ')
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # Mac OSX
+        random_numbers_positive=$(jot -r $(($n / 2)) 1 1000 | tr '\n' ' ' | sed 's/ $//')
+        random_numbers_negative=$(jot -r $(($n - $n / 2)) 1 1000 | awk '{print $0*-1}' | tr '\n' ' ' | sed 's/ $//')
+        # Combine positive and negative random numbers
+        random_numbers="$random_numbers_positive $random_numbers_negative"
+        # Convert the string into an array and shuffle it
+        read -ra random_numbers_array <<< "$random_numbers"
+        random_numbers=$(printf "%s\n" "${random_numbers_array[@]}" | awk 'BEGIN{srand()} {print rand()"\t"$0}' | sort -k1n | cut -f2- | tr '\n' ' ')
+    else
+        # Linux
+        random_numbers_positive=$(shuf -i 1-1000 -n "$(($n / 2))" | tr '\n' ' ' | sed 's/ $//')
+        random_numbers_negative=$(shuf -i 1-1000 -n "$(($n - $n / 2))" | awk '{print $0*-1}' | tr '\n' ' ' | sed 's/ $//')
+        # Combine positive and negative random numbers
+        random_numbers="$random_numbers_positive $random_numbers_negative"
+        # Convert the string into an array and shuffle it
+        read -ra random_numbers_array <<< "$random_numbers"
+        random_numbers=$(printf "%s\n" "${random_numbers_array[@]}" | shuf | tr '\n' ' ')
+    fi
 
     # Run push_swap and capture the output
     push_swap_output=$(.././push_swap $random_numbers)
@@ -101,7 +110,7 @@ else
 fi
 
 # Calculate highest and lowest
-highest=${sorted_moves[-1]}
+highest=${sorted_moves[${#sorted_moves[@]}-1]}
 lowest=${sorted_moves[0]}
 
 # Output the average, median, score, highest and lowest
