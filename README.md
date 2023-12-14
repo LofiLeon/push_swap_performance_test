@@ -12,7 +12,7 @@ cd push_swap_performance_test
 
 **Usage**
 ```
-./checker_script.sh [count_of_numbers > 1] [number_of_times > 0]
+./performance.sh [count_of_numbers > 1] [number_of_times > 0]
 ```
 - **count_of_numbers:** count of random numbers to generate for each run.
 - **number_of_times** is the number of times to run the test.
